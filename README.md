@@ -59,7 +59,7 @@ make
 ```
 cd ..
 cd build/bin/
-./main <data(csv format) path> <adjacency matrix(csv format)> -v <validation number> -t <target variable>
+./main <adjacency matrix(csv format)>  <data(csv format) path> <output path> -t <target variable>
 ```
 The ```-help```command line option will show more information about main program. For example:
 ```

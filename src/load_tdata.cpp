@@ -21,6 +21,12 @@
 */
 std::vector<std::vector<int> > load_tdata(std::vector<std::vector<int> > data, int v, int validation_num){
     std::vector<std::vector<int> > test_data;
+    if(validation_num == 0){
+        for(int i = 0; i < data.size(); ++i){
+            test_data.push_back(data[i]);
+        }
+        return test_data;
+    }
     if(v < validation_num - 1){
         for(int i = v * (data.size() / validation_num); i < (v + 1) * (data.size() / validation_num); ++i){
             test_data.push_back(data[i]);

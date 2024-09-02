@@ -69,6 +69,8 @@ std::vector<std::vector<double> > est_dist(std::vector<std::vector<int> > test_d
                 p[v] += std::log(n_ijk + alpha_ijk) - std::log(n_ij + alpha_ij);
             }
         }
+        std::cout << std::exp(p[0]) << " " << std::exp(p[1]) << std::endl;
+
         double total = 0.0;
         for(int n = 0; n < number_state[target_variable]; ++n){
             total += std::exp(p[n]);
@@ -80,6 +82,8 @@ std::vector<std::vector<double> > est_dist(std::vector<std::vector<int> > test_d
         for(int j = 0; j < number_state[target_variable]; ++j){
             p[j] = std::exp(p[j]) / total;
         }
+        std::cout << (p[0]) << " " << (p[1]) << std::endl;
+
         // std::cout << "total: " <<  total << " p[0]: " << p[0] << " p[1]: " << p[1] << std::endl << std::endl;
         p_dist.push_back(p);
     }

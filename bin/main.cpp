@@ -15,6 +15,7 @@
 #include<boost/timer/timer.hpp>
 #include<boost/asio.hpp>
 #include<boost/thread.hpp>
+#include<fstream>
 #include"load_matrix.hpp"
 #include"load_data.hpp"
 #include"load_ldata.hpp"
@@ -27,7 +28,8 @@ namespace po = boost::program_options;
 
 std::string matrix_path;
 std::string data_path;
-int validation_num;
+std::string output_path;
+int validation_num = 0; // DO NOT CHANGE
 int target_variable;
 
 
@@ -43,11 +45,13 @@ void estimate(){
     std::vector<std::vector<int> > matrix = load_matrix(matrix_path);
     int variable_num = matrix.size();
 
+
     // set up data
     std::vector<std::vector<int> > data = load_data(data_path);
     for(int i = 0; i <  variable_num; ++i){
         number_state.push_back(0);
     }
+
     std::vector<int> max(variable_num, 0);
     for(int i = 0; i < data.size(); ++i){
         for(int j = 0; j < variable_num; ++j){
@@ -64,9 +68,9 @@ void estimate(){
     }
 
     // estimate the probabilistic distribution
-    for(int v = 0; v < validation_num; ++v){
-        std::cout << "validation: " << v << std::endl;
-
+    // for(int v = 0; v < validation_num; ++v){
+        // std::cout << "validation: " << v << std::endl;
+        int v = 0; // DO NOT CHANGE
         learning_data = load_ldata(data, v, validation_num);
         test_data = load_tdata(data, v, validation_num);
 
@@ -79,19 +83,30 @@ void estimate(){
 
         // initialize CFT
         cft = make_cft(learning_data, number_state, matrix, max_state);
-        
 
         // estimate the class variable distribution
         p_distribution = est_dist(test_data, number_state, matrix, max_state, cft, target_variable );
 
         // check
-        for(int i = 0; i < test_data.size(); ++i){
-            for(int v = 0; v < number_state[target_variable] - 1; ++v){
-                printf("state[%d]: %f, ", v, p_distribution[i][v]);
+        // for(int i = 0; i < test_data.size(); ++i){
+        //     for(int v = 0; v < number_state[target_variable] - 1; ++v){
+        //         printf("state[%d]: %f, ", v, p_distribution[i][v]);
+        //     }
+        //     printf("state[%d]: %f\n", number_state[target_variable] - 1, p_distribution[i][number_state[target_variable] - 1]);
+        // }
+
+        // output 
+        std::ofstream ofs(output_path);
+        if(ofs){
+            for(int i = 0; i < test_data.size(); ++i){
+                ofs << p_distribution[i][1] << std::endl;
             }
-            printf("state[%d]: %f\n", number_state[target_variable] - 1, p_distribution[i][number_state[target_variable] - 1]);
+        }else{
+            std::cerr << "Output path dose not exists." << std::endl;
+            std::exit(1);
         }
-    }
+
+    // }
 
 }
 
@@ -112,7 +127,8 @@ int main(int argc, char** argv){
     desc.add_options()
         ("matrix_path", po::value<std::string > (&matrix_path)->required(), "The file containing the adjacency matrix in csv format. First positional argument.")
         ("data_path", po::value<std::string > (&data_path)->required(), "The file containing the sample data (start 0) in csv format. Second positional argument.")
-        ("validation_num,v", po::value<int> (&validation_num)->default_value(10), "The maximum validation number  for the estimation. ")
+        ("output_path", po::value<std::string > (&output_path)->required(), "The output file in csv format. Third positional argument.")
+        // ("validation_num,v", po::value<int> (&validation_num)->default_value(10), "The maximum validation number  for the estimation. ")
         ("target_variable,t", po::value<int> (&target_variable)->default_value(0), "The target variable for the estimation. 0 ~ variable num - 1")
         ("help,h", "Show this help message.")
     ;
@@ -121,6 +137,7 @@ int main(int argc, char** argv){
     po::positional_options_description positionalOptions;
     positionalOptions.add("matrix_path", 1);
     positionalOptions.add("data_path", 2);
+    positionalOptions.add("output_path", 3);
     po::variables_map vm;
     po::store(po::command_line_parser(argc, argv).options(desc)
         .positional(positionalOptions).run(), vm);
@@ -130,6 +147,7 @@ int main(int argc, char** argv){
         return 0;
     }
     po::notify(vm);
+
 
     // main function
     estimate();

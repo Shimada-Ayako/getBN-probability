@@ -21,6 +21,14 @@
 */
 std::vector<std::vector<int> > load_ldata(std::vector<std::vector<int> > data, int v, int validation_num){
     std::vector<std::vector<int> > learning_data;
+    if(validation_num == 0){
+        for(int i = 0; i < data.size(); ++i){
+            learning_data.push_back(data[i]);
+        }
+        return learning_data;
+    }
+
+
     if(v < validation_num - 1){
         for(int i = 0; i < data.size(); ++i){
             if(i < v * (data.size() / validation_num) || (v + 1) * (data.size() / validation_num) <= i){
